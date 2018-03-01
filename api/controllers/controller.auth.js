@@ -3,6 +3,7 @@ const required_data = ["name", "surname", "email", "password"];
 
 let bcrypt = require('bcrypt-nodejs');
 let User = require('../models/user');
+let jwt = require('../services/jwt');
 
 function saveUser (req, res) {
   let params = req.body;
@@ -15,7 +16,7 @@ function saveUser (req, res) {
   if (done) {
     for (let data of required_data) {
       if (data=='password') {
-        bcrypt.hash(params.password, null, null, (err, hash) => {
+          bcrypt.hash(params.password, null, null, (err, hash) => {
           user.password = hash;
         });
       }else{
@@ -44,7 +45,38 @@ function saveUser (req, res) {
   }
 }
 
+function login(req, res) {
+  let params = req.body;
+
+  let email = params.email;
+  let pass = params.password
+
+  User.findOne({email: email}, (err, user) => {
+    if (err) return res.status(500).send({message: "FAIL: Connection failed"});
+
+    if (user) {
+      bcrypt.compare(pass, user.password, (err, check) => {
+        if (!check) {
+          return res.status(404).send({message: "Contraseña incorrecta para ", email});
+        }
+
+        if (params.token) {
+          return res.status(200).send({
+            token: jwt.createToken(user)
+          })
+        }
+
+        user.password = undefined;
+        return res.status(200).send({user: user, token: jwt.createToken(user)});
+      })
+    }else{
+      return res.status(404).send({message: "No existe usuario ", email});
+    }
+  })
+}
+
 
  module.exports = {
-   saveUser
+   saveUser,
+   login
  }
