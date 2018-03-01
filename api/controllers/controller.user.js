@@ -12,9 +12,6 @@ function saveUser (req, res) {
     return value in params;
   })
 
-  /*
-  *TODO: middleware to check if user already exists
-  */
   if (done) {
     for (let data of required_data) {
       if (data=='password') {
@@ -31,7 +28,7 @@ function saveUser (req, res) {
     user.image = null;
 
     user.save((err, userStored) => {
-      if (err) return res.status(400).send({message: "Some error saving user: ", err});
+      if (err) return res.status(400).send({message: "Some error saving user: ", error: err});
       if (userStored){
         res.status(200).send({
           message: "User registered succesfull.",
