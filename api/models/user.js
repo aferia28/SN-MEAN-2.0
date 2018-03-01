@@ -7,10 +7,32 @@ let userSchema = Schema({
   name: String,
   surname: String,
   nick: String,
-  email: String,
+  email: {
+    type: String,
+    required: true
+  },
   password: String,
   role: String,
   image: String
 });
 
-module.exports = mongoose.model('User', userSchema);
+/*
+* User model Validators
+*/
+userSchema.pre('save', function (next) {
+  var self = this;
+  User.find({ $or: [
+      {email: self.email.toLowerCase()},
+      {surname: self.surname.toLowerCase()}
+    ]}, (err, docs) => {
+        if (!docs.length){
+            next();
+        }else{
+            console.error('FAIL: User exists: ', self.email);
+            next(new Error("User exists!"));
+        }
+    });
+});
+
+let User = mongoose.model('User', userSchema);
+module.exports = User;

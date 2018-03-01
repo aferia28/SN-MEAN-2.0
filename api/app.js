@@ -6,15 +6,21 @@ let bodyParser = require('body-parser');
 let app = express();
 
 //define routes
+let user_routes = require('./routes/routes.auth')
 
 //middlewares
 //to parser all request data to json
-app.use(bodyParser.urlencoded({extended:false}));
-app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({limit: '50mb', extended:false}));
+app.use(bodyParser.json({limit: '50mb'}));
 
 //cors
 
 //routes
+/* Use routes on routes/routes.auth like api routes:
+  ie: route "/home" on routes.auth will be used as "/api/home"
+*/
+app.use('/api', user_routes);
+
 app.get('/', (req, res) => {
   res.status(200).send({
     message: "Test route"
