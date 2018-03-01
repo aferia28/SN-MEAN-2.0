@@ -1,10 +1,14 @@
 'user strict'
 const required_data = ["name", "surname", "email", "password"];
+const valid_image_ext = ["jpg", "png", "jpeg", "gif"];
 
 let bcrypt = require('bcrypt-nodejs');
 let User = require('../models/user');
 let jwt = require('../services/jwt');
 let mongoose_paginate = require('mongoose-pagination');
+let fs = require('fs');
+let path = require('path');
+
 
 function register (req, res) {
   let params = req.body;
@@ -46,6 +50,7 @@ function register (req, res) {
   }
 }
 
+
 function login(req, res) {
   let params = req.body;
 
@@ -58,7 +63,7 @@ function login(req, res) {
     if (user) {
       bcrypt.compare(pass, user.password, (err, check) => {
         if (!check) {
-          return res.status(404).send({message: "Contraseña incorrecta para ", email});
+          return res.status(404).send({message: "Wrong passwordfor ", email});
         }
 
         if (params.token) {
@@ -75,6 +80,60 @@ function login(req, res) {
     }
   })
 }
+
+
+function update_user(req, res) {
+  let user_id = req.params.id;
+  let update_data = req.body;
+
+  if (user_id != req.user.sub) {
+    return res.status(500).send({message: "FAIL: You do not have permission to update this user."});
+  }
+
+  User.findByIdAndUpdate(user_id, update_data, {new:true},
+    (err, updated_user) => {
+      if (err) return res.status(500).send({message: "FAIL: Connection failed"});
+      if(!update_user) return res.status(404).send({message: "FAIL: update failed"});
+
+      return res.status(200).send({
+        user: updated_user
+      })
+    });
+}
+
+
+function update_avatar(req, res) {
+  let user_id = req.params.id;
+
+  if (user_id != req.user.sub) {
+    return res.status(500).send({message: "FAIL: You do not have permission to update this user."});
+  }
+
+  if (req.files) {
+    let file_path = req.files.image.path,
+        file_split = file_path.split('\\'),
+        file_name = file_split[2],
+        file_ext = file_name.split('\.')[1];
+
+    if (valid_image_ext.includes(file_ext)) {
+      User.findByIdAndUpdate(user_id, {image: file_name}, {new: true}, (err, updated_user) => {
+        if (err) return res.status(500).send({message: "FAIL: Connection failed"});
+        if(!update_user) return res.status(404).send({message: "FAIL: update failed"});
+
+        return res.status(200).send({
+          user: updated_user
+        })
+      })
+    }else{
+      fs.unlink(file_path, (err) => {
+        return res.status(200).send({message: "FAIL: Invalid extension"});
+      });
+    }
+  }else{
+    return res.status(200).send({message: "FAIL: No files uploaded."});
+  }
+}
+
 
 function get_user(req, res) {
   let user_id = req.params.id;
@@ -131,5 +190,7 @@ function get_user_list(req, res) {
    register,
    login,
    get_user,
-   get_user_list
+   get_user_list,
+   update_user,
+   update_avatar
  }

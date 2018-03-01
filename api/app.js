@@ -10,8 +10,8 @@ let user_routes = require('./routes/routes.auth')
 
 //middlewares
 //to parser all request data to json
-app.use(bodyParser.urlencoded({extended:false}));
-app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({limit: '50mb', extended:false}));
+app.use(bodyParser.json({limit: '50mb'}));
 
 //cors
 
