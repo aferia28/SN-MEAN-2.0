@@ -7,6 +7,8 @@ let conf_const = require('../settings/configure');
 let secret_key_token = 'secret_key_token_s0ci4l_n3twork';
 
 exports.ensureAuth = (req, res, next) => {
+  let payload;
+
   if (!req.headers.authorization) {
     return res.status(403).send({
       message: "Bad request. No authentication header."
@@ -16,7 +18,7 @@ exports.ensureAuth = (req, res, next) => {
   let token = req.headers.authorization.replace(/['"]+/g, '');
 
   try {
-    let payload = jwt.decode(token, secret_key_token);
+    payload = jwt.decode(token, secret_key_token);
     if (payload.exp <= moment().unix()) {
       return res.status(401).send({
         message: "Token has expired."

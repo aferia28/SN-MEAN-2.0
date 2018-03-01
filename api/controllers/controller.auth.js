@@ -4,8 +4,9 @@ const required_data = ["name", "surname", "email", "password"];
 let bcrypt = require('bcrypt-nodejs');
 let User = require('../models/user');
 let jwt = require('../services/jwt');
+let mongoose_paginate = require('mongoose-pagination');
 
-function saveUser (req, res) {
+function register (req, res) {
   let params = req.body;
   let user = new User();
 
@@ -75,8 +76,60 @@ function login(req, res) {
   })
 }
 
+function get_user(req, res) {
+  let user_id = req.params.id;
+
+  User.findById(user_id, (err, user) => {
+    if (err) {
+      return res.status(500).send({
+        message: "Request error"
+      })
+    }
+
+    if (!user) {
+      return res.status(404).send({
+        message: "User does not exist"
+      })
+    }
+
+    return res.status(200).send({user});
+  })
+}
+
+function get_user_list(req, res) {
+  let identity_user_id = req.user.sub;
+  let page = 1;
+  let items_per_page = 5;
+
+  if (req.params.page) {
+    page = req.params.page;
+  }
+
+  User.find().sort('_id').paginate(page, items_per_page, (err, users, total) => {
+    if (err) {
+      return res.status(500).send({
+        message: "Request error"
+      })
+    }
+
+    if (!users) {
+      return res.status(404).send({
+        message: "Does not have user avaiable"
+      })
+    }
+
+    return res.status(200).send({
+      users,
+      total,
+      pages: Math.ceil(total/items_per_page)
+    });
+  });
+}
+
 
  module.exports = {
-   saveUser,
-   login
+   register,
+   login,
+   get_user,
+   get_user_list
  }
