@@ -4,6 +4,8 @@ const valid_image_ext = ["jpg", "png", "jpeg", "gif"];
 
 let bcrypt = require('bcrypt-nodejs');
 let User = require('../models/user');
+let Follow = require('../models/follow');
+let interaction_controller = require('../controllers/controller.interaction');
 let jwt = require('../services/jwt');
 let mongoose_paginate = require('mongoose-pagination');
 let fs = require('fs');
@@ -36,15 +38,15 @@ function register (req, res) {
     user.save((err, userStored) => {
       if (err) return res.status(400).send({message: "Some error saving user: ", error: err});
       if (userStored){
-        res.status(200).send({
+        return res.status(200).send({
           message: "User registered succesfull.",
           user: userStored});
       }else{
-        res.status(400).send({message: "User has not registered."});
+        return res.status(400).send({message: "User has not registered."});
       }
     })
   }else{
-    res.status(200).send({
+    return res.status(200).send({
       message: "Some required fields are missing"
     })
   }
@@ -135,10 +137,23 @@ function update_avatar(req, res) {
 }
 
 
+function get_image_file(req, res) {
+  let image_file = req.params.imageFile;
+  let path_file = './uploads/users/'+image_file;
+
+  fs.exists(path_file, (exists) => {
+    if (!exists) {
+      res.status(200).send({message: "FAIL: No image found"})
+    }
+    res.sendFile(path.resolve(path_file));
+  })
+}
+
+
 function get_user(req, res) {
   let user_id = req.params.id;
 
-  User.findById(user_id, (err, user) => {
+  User.findOne({'_id': user_id}, (err, user) => {
     if (err) {
       return res.status(500).send({
         message: "Request error"
@@ -151,8 +166,15 @@ function get_user(req, res) {
       })
     }
 
-    return res.status(200).send({user});
-  })
+    interaction_controller.get_user_follow_status(req.user.sub, user_id)
+      .then((value) => {
+        return res.status(200).send({
+          user,
+          following: value.following,
+          followed: value.followed
+        });
+      });
+  }).select('-password')
 }
 
 function get_user_list(req, res) {
@@ -192,5 +214,6 @@ function get_user_list(req, res) {
    get_user,
    get_user_list,
    update_user,
-   update_avatar
+   update_avatar,
+   get_image_file
  }

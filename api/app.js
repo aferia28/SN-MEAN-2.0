@@ -7,6 +7,7 @@ let app = express();
 
 //define routes
 let user_routes = require('./routes/routes.auth')
+let interaction_routes = require('./routes/routes.interaction')
 
 //middlewares
 //to parser all request data to json
@@ -20,6 +21,7 @@ app.use(bodyParser.json({limit: '50mb'}));
   ie: route "/home" on routes.auth will be used as "/api/home"
 */
 app.use('/api', user_routes);
+app.use('/api', interaction_routes);
 
 app.get('/', (req, res) => {
   res.status(200).send({
