@@ -11,7 +11,11 @@ let userSchema = Schema({
     type: String,
     required: true
   },
-  password: String,
+  password: {
+    type: String,
+    required: true,
+    select: false
+  },
   role: String,
   image: String
 });

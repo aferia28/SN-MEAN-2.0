@@ -15,6 +15,7 @@ api.get('/user/:id', auth_middleware.ensureAuth, authController.get_user);
 api.get('/users/:page?', auth_middleware.ensureAuth, authController.get_user_list);
 api.put('/update-user/:id', auth_middleware.ensureAuth, authController.update_user);
 
-api.post('/update-avatar/:id', [auth_middleware.ensureAuth, upload_middleware], authController.update_avatar)
+api.post('/update-avatar/:id', [auth_middleware.ensureAuth, upload_middleware], authController.update_avatar);
+api.get('/get-user-image/:imageFile', auth_middleware.ensureAuth, authController.get_image_file);
 
 module.exports = api;
