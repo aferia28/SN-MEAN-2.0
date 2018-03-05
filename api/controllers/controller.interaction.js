@@ -45,7 +45,12 @@ function unfollow(req, res) {
   })
 }
 
-
+/**
+ * [get_followed that return users you are following]
+ * @param  {[type]} req [request]
+ * @param  {[type]} res [response]
+ * @return {[type]}     []
+ */
 function get_followed(req, res) {
   let user_id = req.params.id;
   let page = req.params.page ? req.params.page : 1;
@@ -71,7 +76,12 @@ function get_followed(req, res) {
     });
 }
 
-
+/**
+ * [get_followers description]
+ * @param  {[object]} req [http request]
+ * @param  {[object]} res [htpp response]
+ * @return {[object]}     [return an object with total results, total pages and an array of followers]
+ */
 function get_followers(req, res) {
   let user_id = req.params.id; //user that the followers want to see
   let page = req.params.page ? req.params.page : 1;
@@ -101,29 +111,35 @@ function get_followers(req, res) {
     });
 }
 
-
+/*
+* This function returns follow status ( you follow the user or user follows you ) of user that you are looking for.
+* Return
+* { following: boolean, followed: boolean }
+*/
 async function get_user_follow_status(identity_user_id, user_id) {
   let following = await Follow.findOne({
     'user': identity_user_id,
     'follower': user_id
-  }).then((following) => {
+  })
+  .then((following) => {
       let _following = following ? true : false;
       return _following;
-    })
-    .catch((err)=>{
+  })
+  .catch((err)=>{
       return handleError(err);
-    });
+  });
 
   let followed = await Follow.findOne({
     'user': user_id,
     'follower': identity_user_id
-  }).then((followed) => {
+  })
+  .then((followed) => {
       let _followed = followed ? true : false;
       return _followed;
-    })
-    .catch((err) => {
+  })
+  .catch((err) => {
       return handleError(err);
-    });
+  });
 
     return {
       following: following,
@@ -131,10 +147,46 @@ async function get_user_follow_status(identity_user_id, user_id) {
     }
 }
 
+async function get_user_following_status(identity_user_id) {
+  //users that follows the user logged
+  let following_ids_arr = await Follow.find(
+    {'user': identity_user_id}, 'follower')
+    .then((following) => {
+      let ids_Arr = [];
+      following.forEach(elem => {
+        ids_Arr.push((elem.follower).toString());
+      });
+      return ids_Arr;
+    })
+    .catch((err) => {
+      return handleError(err);
+    })
+
+    //users that the user logged follows
+    let followed_ids_arr = await Follow.find(
+      {'follower': identity_user_id}, 'user')
+      .then((followed) => {
+        let ids_Arr = [];
+        followed.forEach(elem => {
+          ids_Arr.push((elem.user).toString());
+        });
+        return ids_Arr;
+      })
+      .catch((err) => {
+        return handleError(err);
+      })
+
+      return {
+        following_ids: following_ids_arr,
+        followed_ids: followed_ids_arr
+      }
+}
+
   module.exports = {
     save_follow,
     unfollow,
     get_followed,
     get_followers,
-    get_user_follow_status
+    get_user_follow_status,
+    get_user_following_status
   }
