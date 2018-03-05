@@ -2,14 +2,15 @@
 const required_data = ["name", "surname", "email", "password"];
 const valid_image_ext = ["jpg", "png", "jpeg", "gif"];
 
-let bcrypt = require('bcrypt-nodejs');
-let User = require('../models/user');
-let Follow = require('../models/follow');
-let interaction_controller = require('../controllers/controller.interaction');
-let jwt = require('../services/jwt');
-let mongoose_paginate = require('mongoose-pagination');
-let fs = require('fs');
-let path = require('path');
+let bcrypt = require('bcrypt-nodejs'),
+    User = require('../models/user'),
+    Follow = require('../models/follow'),
+    Publication = require('../models/publication'),
+    interaction_controller = require('../controllers/controller.interaction'),
+    jwt = require('../services/jwt'),
+    mongoose_paginate = require('mongoose-pagination'),
+    fs = require('fs'),
+    path = require('path');
 
 
 function register (req, res) {
@@ -154,6 +155,7 @@ function get_user(req, res) {
   let user_id = req.params.id;
 
   User.findOne({'_id': user_id}, (err, user) => {
+    let data_response = {}
     if (err) {
       return res.status(500).send({
         message: "Request error"
@@ -168,43 +170,101 @@ function get_user(req, res) {
 
     interaction_controller.get_user_follow_status(req.user.sub, user_id)
       .then((value) => {
-        return res.status(200).send({
+        data_response['user'] = user;
+        data_response['following'] = value.following;
+        data_response['followed'] = value.followed;
+
+        get_count_user_info(user_id).then(value => {
+          data_response["following_count"] = value.following;
+          data_response["followed_count"] = value.followed;
+          data_response["post_count"] = value.publications;
+          return res.status(200).send({
+            data_response
+          });
+        })
+        /*return res.status(200).send({
           user,
           following: value.following,
           followed: value.followed
-        });
+        });*/
       });
+
   }).select('-password')
 }
 
 function get_user_list(req, res) {
   let identity_user_id = req.user.sub;
   let page = 1;
-  let items_per_page = 5;
+  let items_per_page = 10;
 
   if (req.params.page) {
     page = req.params.page;
   }
 
-  User.find().sort('_id').paginate(page, items_per_page, (err, users, total) => {
+  User.find().sort('_id').lean().paginate(page, items_per_page, (err, users, total) => {
     if (err) {
-      return res.status(500).send({
-        message: "Request error"
-      })
+      return res.status(500).send({message: "Request error"})
     }
 
     if (!users) {
-      return res.status(404).send({
-        message: "Does not have user avaiable"
-      })
+      return res.status(404).send({message: "Does not have user avaiable"})
     }
 
-    return res.status(200).send({
-      users,
-      total,
-      pages: Math.ceil(total/items_per_page)
-    });
+    interaction_controller.get_user_following_status(req.user.sub)
+      .then((value) => {
+        //value.following_ids = ids of following users
+        users.forEach((elem, idx) => {
+          elem['following'] = false;
+          elem['followed'] = false;
+          if (value.following_ids.includes((elem._id).toString())) {
+            elem['following'] = true;
+          }
+
+          if (value.followed_ids.includes((elem._id).toString())) {
+            elem['followed'] = true;
+          }
+        });
+
+        return res.status(200).send({
+          following_ids: value.following_ids,
+          followed_ids: value.followed_ids,
+          users: users,
+          total,
+          pages: Math.ceil(total/items_per_page)
+        });
+      })
   });
+}
+
+async function get_count_user_info(user_id) {
+
+  let following = await Follow.count({'user': user_id})
+                              .then((count) => {
+                                return count;
+                              })
+                              .catch((err)=>{
+                                return handleError(err);
+                              });
+  let followed = await Follow.count({'follower': user_id})
+                             .then((count) => {
+                                return count;
+                              })
+                              .catch((err)=>{
+                                return handleError(err);
+                              });
+  let publications = await Publication.count({'user': user_id})
+                                      .then((count) => {
+                                          return count;
+                                      })
+                                      .catch((err)=>{
+                                          return handleError(err);
+                                      });
+
+  return {
+    following: following,
+    followed: followed,
+    publications: publications
+  }
 }
 
 

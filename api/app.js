@@ -8,10 +8,11 @@ let app = express();
 //define routes
 let user_routes = require('./routes/routes.auth')
 let interaction_routes = require('./routes/routes.interaction')
+let publication_routes = require('./routes/routes.publications')
 
 //middlewares
 //to parser all request data to json
-app.use(bodyParser.urlencoded({limit: '50mb', extended:false}));
+app.use(bodyParser.urlencoded({limit: '50mb', extended:true}));
 app.use(bodyParser.json({limit: '50mb'}));
 
 //cors
@@ -22,6 +23,7 @@ app.use(bodyParser.json({limit: '50mb'}));
 */
 app.use('/api', user_routes);
 app.use('/api', interaction_routes);
+app.use('/api', publication_routes);
 
 app.get('/', (req, res) => {
   res.status(200).send({
