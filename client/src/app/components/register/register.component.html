@@ -1,70 +1,78 @@
 
-<div class="col-xs-12 col-sm-8 col-md-6 col-xs-offset-0 col-sm-offset-2 col-md-offset-3">
-  <form [formGroup]="registerForm" (ngSubmit)="onSubmit(registerForm)" class="form-horizontal">
-    <fieldset>
-      <div id="legend">
-        <legend class="">{{section_title}}</legend>
-      </div>
-      <div class="control-group">
-        <!-- Username -->
-        <label class="control-label"  for="name">Name</label>
-        <div class="controls">
-          <input type="text" formControlName="name" name="name" class="form-control">
-          <div *ngIf="registerForm.controls['name'].invalid && (registerForm.controls['name'].dirty || registerForm.controls['name'].touched)" class="alert alert-danger">
-            <div *ngIf="registerForm.controls['name'].errors.required">
-              Name is required.
-            </div>
-        </div>
-        </div>
+<div class="container">
+  <div class="row justify-content-md-center">
+    <div class="col-xs-12 col-sm-8 col-md-6">
+
+      <div *ngIf="registerStatus.status" class="alert alert-{{registerStatus.status}}">
+        {{registerStatus.message}} <a routerLink="{{registerStatus.nextUrl}}">{{registerStatus.next}}</a>
       </div>
 
-      <div class="control-group">
-        <!-- Username -->
-        <label class="control-label"  for="surname">surname</label>
-        <div class="controls">
-          <input type="text" formControlName="surname" name="surname" class="form-control">
-        </div>
-      </div>
-
-      <div class="control-group">
-        <!-- E-mail -->
-        <label class="control-label" for="email">E-mail</label>
-        <div class="controls">
-          <input type="email" formControlName="email" name="email" class="form-control">
-          <div *ngIf="registerForm.controls['email'].invalid && (registerForm.controls['email'].dirty || registerForm.controls['email'].touched)" class="alert alert-danger">
-            <div *ngIf="registerForm.controls['email'].errors.required">
-              Name is required.
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit(registerForm)" class="form-horizontal">
+        <fieldset>
+          <div id="legend">
+            <legend class="">{{section_title}}</legend>
+          </div>
+          <div class="control-group">
+            <!-- Username -->
+            <label class="control-label"  for="name">Name</label>
+            <div class="controls">
+              <input type="text" formControlName="name" name="name" class="form-control">
+              <div *ngIf="registerForm.controls['name'].invalid && (registerForm.controls['name'].dirty || registerForm.controls['name'].touched)" class="form-has-error">
+                <div *ngIf="registerForm.controls['name'].errors.required">
+                  Name is required.
+                </div>
             </div>
-            <div *ngIf="registerForm.controls['email'].errors.pattern">
-              Invalid email
             </div>
-        </div>
-        </div>
-      </div>
+          </div>
 
-      <div class="control-group">
-        <!-- Password-->
-        <label class="control-label" for="password">Password</label>
-        <div class="controls">
-          <input type="password" formControlName="password" name="password" class="form-control">
-          <div *ngIf="registerForm.controls['password'].invalid && (registerForm.controls['password'].dirty || registerForm.controls['password'].touched)" class="alert alert-danger">
-            <div *ngIf="registerForm.controls['password'].errors.required">
-              Name is required.
+          <div class="control-group">
+            <!-- Username -->
+            <label class="control-label"  for="surname">surname</label>
+            <div class="controls">
+              <input type="text" formControlName="surname" name="surname" class="form-control">
             </div>
-            <div *ngIf="registerForm.controls['password'].errors.pattern">
-              Invalid email
+          </div>
+
+          <div class="control-group">
+            <!-- E-mail -->
+            <label class="control-label" for="email">E-mail</label>
+            <div class="controls">
+              <input type="email" formControlName="email" name="email" class="form-control">
+              <div *ngIf="registerForm.controls['email'].invalid && (registerForm.controls['email'].dirty || registerForm.controls['email'].touched)" class="form-has-error">
+                <div *ngIf="registerForm.controls['email'].errors.required">
+                  Name is required.
+                </div>
+                <div *ngIf="registerForm.controls['email'].errors.pattern">
+                  Invalid email
+                </div>
             </div>
-        </div>
-        </div>
-      </div>
+            </div>
+          </div>
 
-      <div class="control-group">
-        <!-- Button -->
-        <div class="controls">
-          <button class="btn btn-success" [disabled]="registerForm.invalid">Register</button>
-        </div>
-      </div>
-    </fieldset>
-  </form>
+          <div class="control-group">
+            <!-- Password-->
+            <label class="control-label" for="password">Password</label>
+            <div class="controls">
+              <input type="password" formControlName="password" name="password" class="form-control">
+              <div *ngIf="registerForm.controls['password'].invalid && (registerForm.controls['password'].dirty || registerForm.controls['password'].touched)" class="form-has-error">
+                <div *ngIf="registerForm.controls['password'].errors.required">
+                  Name is required.
+                </div>
+                <div *ngIf="registerForm.controls['password'].errors.pattern">
+                  Invalid email
+                </div>
+            </div>
+            </div>
+          </div>
 
+          <div class="control-group">
+            <!-- Button -->
+            <div class="controls">
+              <button class="btn btn-success" [disabled]="registerForm.invalid">Register</button>
+            </div>
+          </div>
+        </fieldset>
+      </form>
+    </div>
+  </div>
 </div>

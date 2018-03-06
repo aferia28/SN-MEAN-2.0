@@ -3,7 +3,9 @@ import { Router, ActivatedRoute, Params } from '@angular/router';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 
 import { User } from '../../models/user';
+
 import { UserService } from '../../services/user.service';
+import { GLOBAL } from '../../services/global'
 
 @Component({
   selector: 'register',
@@ -17,6 +19,7 @@ export class RegisterComponent implements OnInit{
     public email_pattern_regex:string;
     public registerForm: FormGroup;
     public isValidFormSubmitted:boolean;
+    public registerStatus:object;
 
     constructor( private _route: ActivatedRoute, private _router: Router, private _userService: UserService, private _uf: FormBuilder ){
       this.section_title = 'Register'
@@ -26,7 +29,12 @@ export class RegisterComponent implements OnInit{
     }
 
     ngOnInit() {
-      console.log('Component register loaded')
+      this.registerStatus = {
+        status: null,
+        message: null,
+        nextUrl: null,
+        next: null
+      }
     }
 
     createRegisterForm() {
@@ -48,12 +56,35 @@ export class RegisterComponent implements OnInit{
       let user: User = this.registerForm.value;
       this._userService.register(user).subscribe(
         response => {
-          console.log(response)
+          if (response.user && response.user._id) {
+            this.registerStatus = {
+              status: 'success',
+              message: response.message,
+              nextUrl: GLOBAL.login_path,
+              next: "Login here."
+            };
+          }
+
+          this.resetFormStatus()
           this.registerForm.reset();
         },
         error => {
-          console.log(<any>error)
+          //TODO: manage response when error occurs.
+          this.registerStatus = {
+            status: 'danger',
+            message: error.error.message
+          };
+          console.log(<any>error.error);
         }
       );
+    }
+
+    resetFormStatus() {
+      setTimeout(() => {
+        this.registerStatus = {
+          status: null,
+          message: null
+        }
+      }, 5000)
     }
 }

@@ -35,7 +35,7 @@ function register (req, res) {
     //Optional fields
     user.role = 'ROLE_USER';
     user.image = null;
-    user.nick = user.name[0]+user.surname;
+    user.nick = (user.name[0]+user.surname.split(" ")[0]).toLowerCase();
 
     user.save((err, userStored) => {
       if (err) {
