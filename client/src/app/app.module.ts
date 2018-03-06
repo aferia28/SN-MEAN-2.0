@@ -1,5 +1,9 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
+import { FormsModule, ReactiveFormsModule  } from '@angular/forms';
+//import { HttpModule } from '@angular/http';
+import { HttpClientModule } from '@angular/common/http';
+import { routing, appRoutingProviders } from './app.routing';
 
 //COMPONENTS
 import { AppComponent } from './app.component';
@@ -14,9 +18,15 @@ import { RegisterComponent } from './components/register/register.component';
     RegisterComponent
   ],
   imports: [
-    BrowserModule
+    BrowserModule,
+    FormsModule,
+    ReactiveFormsModule ,
+    HttpClientModule,
+    routing
   ],
-  providers: [],
+  providers: [
+    appRoutingProviders
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

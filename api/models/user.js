@@ -29,11 +29,12 @@ userSchema.pre('save', function (next) {
       {email: self.email.toLowerCase()},
       {surname: self.surname.toLowerCase()}
     ]}, (err, docs) => {
-        if (!docs.length){
-            next();
+        if (docs.length){
+          let error = new Error("FAIL: User exists: " +  self.email);
+          error.text = "FAIL: " + self.email + " already exist. Try with another email.";
+          next(error);
         }else{
-            console.error('FAIL: User exists: ', self.email);
-            next(new Error("User exists!"));
+          next();
         }
     });
 });

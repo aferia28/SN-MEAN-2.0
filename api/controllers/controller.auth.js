@@ -35,9 +35,17 @@ function register (req, res) {
     //Optional fields
     user.role = 'ROLE_USER';
     user.image = null;
+    user.nick = user.name[0]+user.surname;
 
     user.save((err, userStored) => {
-      if (err) return res.status(400).send({message: "Some error saving user: ", error: err});
+      if (err) {
+        let message = err.text ? err.text : "FAIL: Error saving user. Please, try again later.";
+        error_to_response = {
+          status: 'ko',
+          message: message
+        }
+        return res.status(400).send(error_to_response);
+      }
       if (userStored){
         return res.status(200).send({
           message: "User registered succesfull.",

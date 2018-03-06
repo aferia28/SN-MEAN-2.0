@@ -13,6 +13,6 @@ export class LoginComponent implements OnInit{
     }
 
     ngOnInit(){
-      console.log('Componente Login cargado')
+      console.log('Componente Login loaded')
     }
 }
