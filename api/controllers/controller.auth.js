@@ -68,7 +68,8 @@ function login(req, res) {
   let email = params.email;
   let pass = params.password
 
-  User.findOne({email: email}, (err, user) => {
+  User.findOne({email: email}).select('+password').exec((err, user) => {
+    console.log(user);
     if (err) return res.status(500).send({message: "FAIL: Connection failed"});
 
     if (user) {
@@ -83,7 +84,6 @@ function login(req, res) {
           })
         }
 
-        user.password = undefined;
         return res.status(200).send({user: user, token: jwt.createToken(user)});
       })
     }else{
